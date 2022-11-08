@@ -60,16 +60,16 @@ http.adornParams = (params = {}, openDefaultParams = true) => {
 /**
  * post请求数据处理
  * @param {*} data 数据对象
- * @param {*} openDefaultParams 是否开启默认数据?
+ * @param {*} openDefaultData 是否开启默认数据?
  * @param {*} contentType 数据格式
  *  json: 'application/json; charset=utf-8'
  *  form: 'application/x-www-form-urlencoded; charset=utf-8'
  */
-http.adornData = (data = {}, openDefaultParams = true, contentType = 'json') => {
+http.adornData = (data = {}, openDefaultData = true, contentType = 'json') => {
   var defaults = {
     't': new Date().getTime()
   }
-  data = openDefaultParams ? merge(defaults, data) : data
+  data = openDefaultData ? merge(defaults, data) : data
   return contentType === 'json' ? JSON.stringify(data) : qs.stringify(data)
 }
 
