@@ -5,7 +5,6 @@
       active-text="开启拖拽"
       inactive-text="关闭拖拽">
     </el-switch>
-    <el-button v-if="draggable" @click="batchSave">批量保存</el-button>
     <el-tree
       :data="menus"
       :props="defaultProps"
@@ -116,8 +115,6 @@ export default {
         console.log('成功获取到菜单数据....', data.data)
         this.menus = data.data
         // 操作（拖拽等）成功后刷新这两个值，防止缓存在内存中重复计算
-        this.maxLevel = 0
-        this.updateNodes = []
       })
     },
     edit (data) {
@@ -304,6 +301,8 @@ export default {
         this.getMenus()
         // 设置需要默认展开的菜单
         this.expandedKey = [pCid]
+        this.maxLevel = 0
+        this.updateNodes = []
       })
     },
     // 改变子节点的层级
