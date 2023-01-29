@@ -81,6 +81,7 @@ export default {
   props: {},
   data () {
     return {
+      pCid: 0,
       draggable: false, // 拖拽
       // 拖拽节点时，需要修改信息的节点
       updateNodes: [],
@@ -133,9 +134,10 @@ export default {
         // 刷新出新的菜单
         this.getMenus()
         // 设置需要默认展开的菜单
-        this.expandedKey = [pCid]
+        this.expandedKey = [this.pCid]
         this.maxLevel = 0
         this.updateNodes = []
+        this.pCid = 0
       })
     },
     edit (data) {
@@ -268,7 +270,7 @@ export default {
       this.countNodeLevel(draggingNode.data)
       // 当前正在拖动的节点最大深度+父节点所在的深度不大于3即可
       // 子结点的最大深度-当前拖动节点的深度就是当前节点的深度
-      let deep = this.maxLevel - draggingNode.data.catLevel + 1
+      let deep = (this.maxLevel - draggingNode.level) <= 0 ? 1 : (this.maxLevel - draggingNode.level)
       console.log('正在拖动的节点的深度: ', deep)
       if (type === 'inner') {
         return (deep + dropNode.level) <= 3
@@ -288,6 +290,7 @@ export default {
         pCid = dropNode.data.catId
         siblings = dropNode.childNodes
       }
+      this.pCid = pCid
       // 2.当前拖拽节点的最新顺序
       for (let i = 0; i < siblings.length; ++i) {
         if (draggingNode.data.catId === siblings[i].data.catId) {
