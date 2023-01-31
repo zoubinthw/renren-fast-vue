@@ -6,6 +6,7 @@
       inactive-text="关闭拖拽">
     </el-switch>
     <el-button v-if="draggable" @click="batchSave">批量保存</el-button>
+    <el-button type="danger" @click="batchDelete">批量删除</el-button>
     <el-tree
       :data="menus"
       :props="defaultProps"
@@ -16,6 +17,7 @@
       :draggable="draggable"
       :allow-drop="allowDrop"
       @node-drop="handleDrop"
+      ref="menuTree"
     >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <span>{{ node.label }}</span>
@@ -81,7 +83,7 @@ export default {
   props: {},
   data () {
     return {
-      pCid: 0,
+      pCid: [],
       draggable: false, // 拖拽
       // 拖拽节点时，需要修改信息的节点
       updateNodes: [],
@@ -134,10 +136,10 @@ export default {
         // 刷新出新的菜单
         this.getMenus()
         // 设置需要默认展开的菜单
-        this.expandedKey = [this.pCid]
+        this.expandedKey = this.pCid
         this.maxLevel = 0
         this.updateNodes = []
-        this.pCid = 0
+        // this.pCid = 0
       })
     },
     edit (data) {
@@ -254,12 +256,12 @@ export default {
     // 统计当前节点的总层数
     countNodeLevel (node) {
       // 找到所有子结点，求出最大深度
-      if (node.children != null && node.children.length > 0) {
-        for (let i = 0; i < node.children.length; ++i) {
-          if (node.children[i].catLevel > this.maxLevel) {
-            this.maxLevel = node.children[i].catLevel
+      if (node.childNodes != null && node.childNodes.length > 0) {
+        for (let i = 0; i < node.childNodes.length; ++i) {
+          if (node.childNodes[i].level > this.maxLevel) {
+            this.maxLevel = node.childNodes[i].level
           }
-          this.countNodeLevel(node.children[i])
+          this.countNodeLevel(node.childNodes[i])
         }
       }
     },
@@ -267,7 +269,7 @@ export default {
       // 判断被拖动的当前节点以及所在的父节点的总层数不能大于3
       // 1.被拖动的当前节点的总层数
       console.log('allowDrop', draggingNode, dropNode, type)
-      this.countNodeLevel(draggingNode.data)
+      this.countNodeLevel(draggingNode)
       // 当前正在拖动的节点最大深度+父节点所在的深度不大于3即可
       // 子结点的最大深度-当前拖动节点的深度就是当前节点的深度
       let deep = (this.maxLevel - draggingNode.level) <= 0 ? 1 : (this.maxLevel - draggingNode.level)
@@ -290,7 +292,7 @@ export default {
         pCid = dropNode.data.catId
         siblings = dropNode.childNodes
       }
-      this.pCid = pCid
+      this.pCid.push(pCid)
       // 2.当前拖拽节点的最新顺序
       for (let i = 0; i < siblings.length; ++i) {
         if (draggingNode.data.catId === siblings[i].data.catId) {
@@ -320,6 +322,32 @@ export default {
           this.updateChildNodeLevel(node.childNodes[i])
         }
       }
+    },
+    batchDelete () {
+      let catIds = []
+      let checkedNodes = this.$refs.menuTree.getCheckedNodes()
+      console.log('被选中的元素为: ', checkedNodes)
+      for (let i = 0; i < checkedNodes.length; ++i) {
+        catIds.push(checkedNodes[i].catId)
+      }
+      this.$confirm(`是否删除【${catIds}】菜单?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$http({
+          url: this.$http.adornUrl('/product/category/delete'),
+          method: 'post',
+          data: this.$http.adornData(catIds, false)
+        }).then(({ data }) => {
+          this.$message({
+            message: '菜单批量删除成功',
+            type: 'success'
+          })
+          // 刷新出新的菜单
+          this.getMenus()
+        })
+      }).catch(() => { })
     }
   },
   // 计算属性 类似于 data 概念
