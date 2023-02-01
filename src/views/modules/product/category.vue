@@ -255,25 +255,53 @@ export default {
     },
     // 统计当前节点的总层数
     countNodeLevel (node) {
-      // 找到所有子结点，求出最大深度
-      if (node.childNodes != null && node.childNodes.length > 0) {
-        for (let i = 0; i < node.childNodes.length; ++i) {
-          if (node.childNodes[i].level > this.maxLevel) {
-            this.maxLevel = node.childNodes[i].level
+      let queue = []
+      let deep = 0
+      queue.push(node)
+      while (queue.length > 0) {
+        let num = queue.length
+        for (let k = 0; k < num; ++k) {
+          let curNode = queue.shift()
+          let length = curNode.childNodes.length
+          for (let i = 0; i < length; ++i) {
+            queue.push(curNode.childNodes[i])
           }
-          this.countNodeLevel(node.childNodes[i])
         }
+        ++deep
       }
+      return deep
+      // 找到所有子结点，求出最大深度
+      // if (node.childNodes != null && node.childNodes.length > 0) {
+      //   for (let i = 0; i < node.childNodes.length; ++i) {
+      //     // if (node.childNodes[i].level > this.maxLevel) {
+      //     //   this.maxLevel = node.childNodes[i].level
+      //     // }
+      //     // this.countNodeLevel(node.childNodes[i])
+      //     let deepLevel = 1 + this.countNodeLevel(node.childNodes[i])
+      //   }
+      // }
     },
     allowDrop (draggingNode, dropNode, type) {
       // 判断被拖动的当前节点以及所在的父节点的总层数不能大于3
       // 1.被拖动的当前节点的总层数
-      console.log('allowDrop', draggingNode, dropNode, type)
-      this.countNodeLevel(draggingNode)
+      // console.log('allowDrop', draggingNode, dropNode, type)
+      // this.countNodeLevel(draggingNode)
+      // // 当前正在拖动的节点最大深度+父节点所在的深度不大于3即可
+      // // 子结点的最大深度-当前拖动节点的深度就是当前节点的深度
+      // let deep = (this.maxLevel - draggingNode.level) <= 0 ? 1 : (this.maxLevel - draggingNode.level)
+      // console.log('正在拖动的节点的深度: ', deep)
+      // if (type === 'inner') {
+      //   return (deep + dropNode.level) <= 3
+      // } else {
+      //   return (deep + dropNode.parent.level) <= 3
+      // }
+
+      // console.log('allowDrop', draggingNode, dropNode, type)
+      let deep = this.countNodeLevel(draggingNode)
+      // console.log('当前拖动节点的最大深度为: ', deep)
       // 当前正在拖动的节点最大深度+父节点所在的深度不大于3即可
       // 子结点的最大深度-当前拖动节点的深度就是当前节点的深度
-      let deep = (this.maxLevel - draggingNode.level) <= 0 ? 1 : (this.maxLevel - draggingNode.level)
-      console.log('正在拖动的节点的深度: ', deep)
+      // console.log('正在拖动的节点的深度: ', deep)
       if (type === 'inner') {
         return (deep + dropNode.level) <= 3
       } else {
@@ -297,7 +325,8 @@ export default {
       for (let i = 0; i < siblings.length; ++i) {
         if (draggingNode.data.catId === siblings[i].data.catId) {
           // 如果遍历的是当前正在拖拽的节点, 还需要该这个节点的父ID
-          // 这里比较的是：当前遍历到的拖拽节点（他们的level属性实时更新的）与拖拽的节点的level属性，此时正在被拖拽的节点的子节点只需要同步自己的level属性到自己的catLevel即可
+          // 这里比较的是：通过当前遍历到的拖拽节点dropNode找到的兄弟节点数组中的当前被拖动节点（他们的level属性实时更新的）
+          // 与拖拽的节点draggingNode的level属性进行比较，此时正在被拖拽的节点的子节点只需要同步自己的level属性到自己的catLevel即可
           let catLevel = draggingNode.level
           if (siblings[i].level !== draggingNode.level) {
             // 如果当前节点是拖动的节点且层级和当前拖动节点的层级不一样，说明层级发生变化，需要修改当前节点及其子结点的全部层级
