@@ -139,7 +139,7 @@ export default {
         this.expandedKey = this.pCid
         this.maxLevel = 0
         this.updateNodes = []
-        // this.pCid = 0
+        this.pCid = []
       })
     },
     edit (data) {
