@@ -10,7 +10,7 @@
             <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button @click="getDataList()">查询</el-button>
+            <el-button @click="getDataListByKey()">查询</el-button>
             <el-button type="success" @click="getAllDataList()">查询全部</el-button>
             <el-button
               v-if="isAuth('product:attrgroup:save')"
@@ -139,6 +139,27 @@ export default {
       this.dataListLoading = true
       this.$http({
         url: this.$http.adornUrl(`/product/attrgroup/list/${this.catId}`),
+        method: 'get',
+        params: this.$http.adornParams({
+          page: this.pageIndex,
+          limit: this.pageSize,
+          key: this.dataForm.key
+        })
+      }).then(({data}) => {
+        if (data && data.code === 0) {
+          this.dataList = data.page.list
+          this.totalPage = data.page.totalCount
+        } else {
+          this.dataList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
+    },
+    getDataListByKey () {
+      this.dataListLoading = true
+      this.$http({
+        url: this.$http.adornUrl('/product/attrgroup/list/catelogkey'),
         method: 'get',
         params: this.$http.adornParams({
           page: this.pageIndex,
