@@ -201,7 +201,7 @@ export default {
     },
     // 删除
     deleteHandle (id) {
-      var ids = id
+      const ids = id
         ? [id]
         : this.dataListSelections.map(item => {
           return item.attrGroupId
