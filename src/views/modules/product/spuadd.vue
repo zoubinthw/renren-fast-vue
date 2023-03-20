@@ -685,7 +685,7 @@ export default {
             item.attrs.forEach(attr => {
               attrArray.push({
                 attrId: attr.attrId,
-                attrValues: '',
+                attrValues: attr.valueSelect,
                 showDesc: attr.showDesc
               })
             })
